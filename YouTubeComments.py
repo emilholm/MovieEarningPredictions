@@ -25,7 +25,9 @@ class YouTubeComments():
         :param video_id:
         :return comments:
         """
-        self.url = "https://gdata.youtube.com/feeds/api/videos/" + video_id + "/comments?alt=json&start-index=1&max-results=50&prettyprint=true&orderby=published"
+        self.url = "https://gdata.youtube.com/feeds/api/videos/" + video_id + \
+                   "/comments?alt=json&start-index=1" + \
+                   "&max-results=50&prettyprint=true&orderby=published"
         self.comments.extend(self.get_comment_from_page(self.url))
 
         while self.next_url != "":
