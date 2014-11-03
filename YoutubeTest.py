@@ -8,7 +8,7 @@ from xml.dom import minidom
 def ListComments(jsonObject):
     for item in jsonObject["feed"]["entry"]:
         print item ["content"]["$t"]
-        print "=======234==============================="
+        print "======================================"
 
     for item in jsonObject["feed"]["link"]:
         if (item["rel"] == "next"):
