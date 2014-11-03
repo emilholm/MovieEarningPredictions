@@ -26,7 +26,7 @@ class YouTubeComments():
         :return comments:
         """
         self.url = "https://gdata.youtube.com/feeds/api/videos/" + video_id + \
-                   "/comments?alt=json&start-index=1" + \
+                   "/comments?alt=json" + \
                    "&max-results=50&prettyprint=true&orderby=published"
         self.comments.extend(self.get_comment_from_page(self.url))
 
@@ -38,9 +38,11 @@ class YouTubeComments():
         return self.comments
 
     def get_all_comments_from_last_call(self):
+        """Returns the comments in a list"""
         return self.comments
 
     def get_comment_from_page(self, page_url):
+        """ """
         return_comments = []
         comments = urlopen(page_url)
         data = json.load(comments)
