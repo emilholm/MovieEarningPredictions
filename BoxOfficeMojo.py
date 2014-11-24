@@ -62,7 +62,7 @@ class BoxOfficeMojo():
         """
         url = self.base_url + "movies/?page=daily&id=" + box_office_mojo_name + ".htm"
         page = urlopen(url)
-        return self._find_ernings(page)
+        return self._find_earnings(page)
 
     def get_first_seven_days(self, box_office_mojo_name):
         """
@@ -77,3 +77,5 @@ class BoxOfficeMojo():
 
 mojo = BoxOfficeMojo()
 pprint(mojo.get_search_results("john"))
+pprint(mojo.get_movie_earnings("johnwick"))
+pprint(mojo.get_first_seven_days("johnwick"))
