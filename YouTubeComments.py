@@ -6,8 +6,8 @@ import sys
 
 
 class YouTubeComments():
-    """Class for handling YouTube comments
-    """
+    """Class for handling YouTube comments"""
+
     def __init__(self):
         """Set up the vars used in the YouTubeComments class
         :return:
@@ -27,7 +27,7 @@ class YouTubeComments():
         """
         self.url = "https://gdata.youtube.com/feeds/api/videos/" + video_id + \
                    "/comments?alt=json" + \
-                   "&max-results=50&prettyprint=true&orderby=published"
+                   "&max-results=50&prettyPrint=true&orderby=published"
         self.comments.extend(self.get_comment_from_page(self.url))
 
         while self.next_url != "":
@@ -37,6 +37,7 @@ class YouTubeComments():
 
         return self.comments
 
+    @property
     def get_all_comments_from_last_call(self):
         """Returns the comments in a list"""
         return self.comments
@@ -47,12 +48,9 @@ class YouTubeComments():
         comments = urlopen(page_url)
         data = json.load(comments)
 
-        try:
-            if data["feed"]["entry"]:
-                for item in data["feed"]["entry"]:
-                    return_comments.append(item["content"]["$t"])
-        except KeyError:
-            sys.exc_info()[0]
+        if data["feed"]["entry"]:
+            for item in data["feed"]["entry"]:
+                return_comments.append(item["content"]["$t"])
 
         if data["feed"]["link"]:
             for item in data["feed"]["link"]:
