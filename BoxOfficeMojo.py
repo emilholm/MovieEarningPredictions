@@ -32,6 +32,9 @@ class BoxOfficeMojo():
         """
         Find a specific html pattern and return a list of movie earnings, from a given html page.
 
+        regex pattern is inspired by
+        https://github.com/claudiob/boxoffice/blob/master/boxofficemojo.py
+
         :param page:
         :return list of ints:
         """
@@ -39,8 +42,18 @@ class BoxOfficeMojo():
         return [int(earning.replace(",", "")) for earning in findall(pattern, page)]
 
     def _find_first_seven_earnings(self, page):
+        """
+        Find a specific html pattern and return a list of the 7 first days of the movie earnings, from a given html page
+
+        regex pattern is inspired by
+        https://github.com/claudiob/boxoffice/blob/master/boxofficemojo.py
+
+        :param page:
+        :return list of ints:
+        """
         pattern = r'<font color="#000080">\$([0-9,]*?)</font>'
-        return [int(earning.replace(",", "")) for earning in islice(finditer(pattern, page, flags=0), 7)]
+        return [int(earning.group().replace(",", "").replace('<font color="#000080">$', "").replace("</font>", ""))
+                for earning in islice(finditer(pattern, page, flags=0), 7)]
 
     def get_search_results(self, search_word):
         """
@@ -62,7 +75,7 @@ class BoxOfficeMojo():
         """
         url = self.base_url + "movies/?page=daily&id=" + box_office_mojo_name + ".htm"
         page = urlopen(url)
-        return self._find_earnings(page)
+        return self._find_earnings(page.read())
 
     def get_first_seven_days(self, box_office_mojo_name):
         """
@@ -73,9 +86,9 @@ class BoxOfficeMojo():
         """
         url = self.base_url + "movies/?page=daily&id=" + box_office_mojo_name + ".htm"
         page = urlopen(url)
-        return self._find_first_seven_earnings(page)
+        return self._find_first_seven_earnings(page.read())
 
 mojo = BoxOfficeMojo()
-pprint(mojo.get_search_results("john"))
-pprint(mojo.get_movie_earnings("johnwick"))
-pprint(mojo.get_first_seven_days("johnwick"))
+# pprint(mojo.get_search_results("john"))
+# print mojo.get_movie_earnings("johnwick")
+print mojo.get_first_seven_days("johnwick")
