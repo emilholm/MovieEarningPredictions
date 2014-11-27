@@ -96,19 +96,29 @@ class YouTube():
         return videos
 
     def youtube_comments(self, videoid):
-        ytfeed = self.yts.GetYouTubeVideoCommentFeed(video_id=videoid)
-        comments = [comment.content.text for comment in ytfeed.entry]
-        return comments
+        comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=videoid)
+        while comment_feed is not None:
+            for comment in comment_feed.entry:
+                yield comment
+        next_link = comment_feed.GetNextLink()
+        if next_link is None:
+             comment_feed = None
+        else:
+             comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
 
 
 def main():
     y = YouTube()
-    argparser.add_argument("--q", help="Search term", default="The Dark Knight Rises Trailer")
-    argparser.add_argument("--max-results", help="Max results", default=50)
-    argparser.add_argument("--order", help="View Count", default="viewCount")
-    args = argparser.parse_args()
-    blabla = y.youtube_search(args)
-    print blabla
+    VIDEO_ID = "TvCWWATPWbs"
+    for comment in y.youtube_comments(VIDEO_ID):
+        text = comment.content.text
+        print text
+    #argparser.add_argument("--q", help="Search term", default="The Dark Knight Rises Trailer")
+    #argparser.add_argument("--max-results", help="Max results", default=50)
+    #argparser.add_argument("--order", help="View Count", default="viewCount")
+    #args = argparser.parse_args()
+    #blabla = y.youtube_search(args)
+    #print blabla
 
 if __name__ == '__main__':
     main()
