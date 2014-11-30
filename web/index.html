@@ -6,12 +6,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" media="all" href="web/css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="all" href="web/css/style.css" />
+        <link rel="stylesheet" href="http://lipis.github.io/bootstrap-sweetalert/lib/sweet-alert.css">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="http://lipis.github.io/bootstrap-sweetalert/lib/sweet-alert.js"></script>
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
         <script src="web/js/html5shiv.js"></script>
         <script src="web/js/respond.min.js"></script>
         <![endif]-->
+        <script src="http://fgnass.github.io/spin.js/spin.min.js"></script>
         <script type="text/javascript" src="web/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="web/js/script.js"></script>
     </head>
@@ -33,7 +36,7 @@
                             </div>
                         </form>
                     </div>
-                    <div id="steps">
+                    <div id="steps" class="collapse">
                         <div class="row form-group">
                             <div class="col-xs-12">
                                 <ul class="nav nav-pills nav-justified thumbnail setup-panel">
@@ -56,18 +59,36 @@
                             <div class="row setup-content" id="step-1">
                                 <div class="col-xs-12">
                                     <div class="col-md-12 well text-center">
+                                        <h2>Select Wikipedia Page</h2>
+                                        <div id="loading" class="spinner"></div>
+                                        <ul id="1" class="list-group text-left">
+
+                                        </ul>
+                                        <button id="activate-step-2" class="btn btn-primary pull-right">Next Step</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="row setup-content" id="step-2">
                                 <div class="col-xs-12">
-                                    <div class="col-md-12 well">
+                                    <div class="col-md-12 well text-center">
+                                        <h2>Select BoxOfficeMojo Film</h2>
+                                        <div id="loading" class="spinner"></div>
+                                        <ul id="2" class="list-group text-left">
+
+                                        </ul>
+                                        <button id="activate-step-3" class="btn btn-primary pull-right">Next Step</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="row setup-content" id="step-3">
                                 <div class="col-xs-12">
-                                    <div class="col-md-12 well">
+                                    <div class="col-md-12 well text-center">
+                                        <h2>Select BoxOfficeMojo Film</h2>
+                                        <div id="loading" class="spinner"></div>
+                                        <ul id="3" class="list-group text-left">
+
+                                        </ul>
+                                        <button id="generate-data" class="btn btn-primary pull-right">Generate Data</button>
                                     </div>
                                 </div>
                             </div>
