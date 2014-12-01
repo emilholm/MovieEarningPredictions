@@ -92,11 +92,14 @@ class YouTube():
 
         return videos
 
-    def youtube_comments(self, video_id):
+    def youtube_comments(self, video_id, until_date):
         comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
         while comment_feed is not None:
             for comment in comment_feed.entry:
-                yield comment
+                date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
+                if (date <= until_date):
+                    yield comment
+
         next_link = comment_feed.GetNextLink()
         if next_link is None:
             comment_feed = None
@@ -107,9 +110,11 @@ class YouTube():
 def main():
     y = YouTube()
     video_id = "TvCWWATPWbs"
-    for comment in y.youtube_comments(video_id):
+    for comment in y.youtube_comments(video_id, datetime(2013,10,1)):
         text = comment.content.text
-        print text
+        text2 = comment.published.text
+        print text + text2
+
     # argparser.add_argument("--q", help="Search term", default="The Dark Knight Rises Trailer")
     # argparser.add_argument("--max-results", help="Max results", default=50)
     # argparser.add_argument("--order", help="View Count", default="viewCount")
