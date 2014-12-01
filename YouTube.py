@@ -56,6 +56,8 @@ class YouTube():
         parser = OptionParser()
         parser.add_option("--metrics", dest="metrics", help="Report metrics",
                           default="views,comments,favoritesAdded,favoritesRemoved,likes,dislikes,shares")
+        parser.add_option('--noauth_local_webserver', action='store_true',
+                          default=False, help='Do not run a local web server.')
         parser.add_option("--dimensions", dest="dimensions", help="Report dimensions", default="video")
         parser.add_option("--start-date", dest="start_date", help="Start date, in YYYY-MM-DD format",
                           default=one_week_ago)
@@ -76,7 +78,9 @@ class YouTube():
 
         http = credentials.authorize(httplib2.Http())
         self.yts = gdata.youtube.service.YouTubeService()
-        self.youtube = build(youtube_api_service_name, youtube_api_version, http=http)
+        self.yts.developer_key = ''
+        self.yts.client_id = '749207849890-b23j4l3a4c721es6vih1eoocb39ji4st.apps.googleusercontent.com'
+        self.youtube = build(youtube_api_service_name, youtube_api_version, developerKey='AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI') #http=http)
 
     def youtube_search(self, title, results=50, order_by='viewCount'):
         argparser.add_argument("--q", help="Search term", default=title)
