@@ -25,8 +25,7 @@ class YouTube():
         client_secrets_file = "google_api.json"
 
         # We will require read-only access to the YouTube Data and Analytics API.
-        youtube_scopes = "" # ["https://www.googleapis.com/auth/youtube.readonly"]
-        # , "https://www.googleapis.com/auth/yt-analytics.readonly"]
+        youtube_scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
         youtube_api_service_name = "youtube"
         youtube_api_version = "v3"
         # youtube_analytics_api_service_name = "youtubeAnalytics"
