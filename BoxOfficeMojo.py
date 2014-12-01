@@ -12,11 +12,11 @@ class BoxOfficeMojo():
     Class for getting earnings information about a movie from BoxOfficeMojo.com
     """
 
-    def __init__(self):
+    def __init__(self, base_url="http://www.BoxOfficeMojo.com/"):
         """
         Initialize base information for the class
         """
-        self.base_url = "http://www.BoxOfficeMojo.com/"
+        self.base_url = base_url
 
     def _find_release_date(self, page):
         """

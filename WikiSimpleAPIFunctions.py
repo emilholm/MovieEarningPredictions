@@ -10,9 +10,9 @@ from datetime import datetime
 class WikiSimpleAPIFunctions:
     """Class for making simple requests to the Wikipedia API"""
 
-    def __init__(self):
+    def __init__(self, base_url="https://en.wikipedia.org/w/api.php?action="):
         """Initialize the basic url for the Wikipedia API"""
-        self.base_url = "https://en.wikipedia.org/w/api.php?action="
+        self.base_url = base_url
 
     def search_suggestions(self, search_term):
         """Returns a list of suggestions from Wikipedia, based on the given search term

@@ -35,8 +35,10 @@ $(document).ready(function() {
             step_1 = $(this).attr('id');
         } else if (id == 2) {
             step_2 = $(this).attr('id');
+            console.log(step_2);
         } else if (id == 3) {
             step_3 = $(this).attr('id');
+            console.log(step_3);
         }
         $listgroup.find('li.active').removeClass('active');
         $(this).toggleClass('active');
@@ -190,12 +192,15 @@ $(document).ready(function() {
             $steps.collapse('hide');
             $('#steps').after('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
             $('#steps').after('<div id="loading" class="col-xs-12 page_earnings" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $('#steps').after('<div id="loading" class="col-xs-12 youtube_comments" style="margin-top:50px; margin-bottom: 50px"></div>');
             $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
             $steps.css('display', '');
             var $pageViewsLoading = $('.page_views_loading');
             var $earningsLoading = $('.page_earnings');
+            var $analysis = $('.youtube_comments');
             $pageViewsLoading.append(new Spinner(opts).spin().el);
             $earningsLoading.append(new Spinner(opts).spin().el);
+            $analysis.append(new Spinner(opts).spin().el);
 
             $.ajax({
                 type: "POST",
@@ -287,8 +292,6 @@ $(document).ready(function() {
                         }
                     ]
 
-                    console.log(JSON.stringify(data_set));
-
                     nv.addGraph(function() {
                         var chart = nv.models.discreteBarChart()
                             .x(function(d) {return d.label})
@@ -308,6 +311,23 @@ $(document).ready(function() {
                     });
 
                     $earningsLoading.remove();
+
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/sentimentanalysisytcomments",
+                data: {"youtubeid": step_3, "boxofficemojoname": step_2},
+                cache: false,
+                success: function(data) {
+                    $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>YouTube Comments</h2></div>');
+                    console.log(data)
+
+                    $analysis.remove();
 
                 },
                 error: function(data) {
