@@ -62,9 +62,15 @@ class WebApp(object):
         box_name = boxofficemojoname.encode('utf-8')
         created_date = self.wikifunctions.page_created_date(wiki_name)
         release_date = self.boxofficemojo.get_release_date(box_name)
-        page_views = self.wikipageviews.get_page_views_from_to(wiki_name, created_date, release_date)
-        print page_views
+        page_views = self.wikipageviews.get_page_views_from_to_by_monthly(wiki_name, created_date, release_date)
         result = {str(key): value for key, value in sorted(page_views.iteritems())}
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return dumps(result)
+
+    @cherrypy.expose
+    def getfirstsevendaysearnings(self, boxofficemojoname):
+        box_name = boxofficemojoname.encode('utf-8')
+        result = self.boxofficemojo.get_first_seven_days(box_name)
         cherrypy.response.headers['Content-Type'] = 'application/json'
         return dumps(result)
 

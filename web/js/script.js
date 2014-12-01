@@ -27,36 +27,15 @@ $(document).ready(function() {
         $(this).append(new Spinner(opts).spin().el);
     });
 
-    // graph vars
-    var margin = 40;
-    var width = 960 - margin*2;
-    var height = 500 - margin*2;
-    var xScale = d3.time.scale()
-        .range([0, width])
-        .nice(d3.time.year);
-    var yScale = d3.scale.linear()
-        .range([height, 0])
-        .nice();
-    var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom");
-    var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left");
-    var line = d3.svg.line()
-        .x(function(d) { return xScale(Date.parse(d.date.substring(0, 10))); })
-        .y(function(d) { return yScale(d.value); });
-
-
     // activate item
-    $('body').on('click', '.list-group .list-group-item', function () {
+    $('body').on('click', '.list-group .list-group-item', function() {
         var $listgroup = $(this).closest('.list-group');
         var id = $listgroup.attr('id');
-        if(id == 1) {
+        if (id == 1) {
             step_1 = $(this).attr('id');
-        } else if(id == 2) {
+        } else if (id == 2) {
             step_2 = $(this).attr('id');
-        } else if(id == 3) {
+        } else if (id == 3) {
             step_3 = $(this).attr('id');
         }
         $listgroup.find('li.active').removeClass('active');
@@ -80,7 +59,7 @@ $(document).ready(function() {
         $("#loading").show();
 
         // get data and make it look fancy
-        $('h2').each(function () {
+        $('h2').each(function() {
             $(this).append();
         });
         $('#steps').collapse('show');
@@ -91,13 +70,12 @@ $(document).ready(function() {
             data: {"movie": movie_name},
             cache: false,
             success: function(data) {
-                console.log(data);
                 var $step1 = $("#step-1");
-                $.each(data, function(key, val){
+                $.each(data, function(key, val) {
                     $step1.find(".list-group").append('<li class="list-group-item" id="' + decodeURIComponent(val["url"]) +
-                        '"><h4 class="list-group-item-heading">' + key +
-                        '</h4><p class="list-group-item-text">' + val["description"] +
-                        '</p></li>');
+                            '"><h4 class="list-group-item-heading">' + key +
+                            '</h4><p class="list-group-item-text">' + val["description"] +
+                            '</p></li>');
                 });
                 $step1.find("#loading").hide();
             },
@@ -111,12 +89,11 @@ $(document).ready(function() {
             url: "/searchboxofficemojo",
             data: {"movie": movie_name},
             cache: false,
-            success: function (data) {
-                console.log(data);
+            success: function(data) {
                 var $step2 = $("#step-2");
-                $.each(data, function(key, val){
+                $.each(data, function(key, val) {
                     $step2.find(".list-group").append('<li class="list-group-item" id="' + val +
-                        '"><h4 class="list-group-item-heading">' + key + '</h4></li>');
+                            '"><h4 class="list-group-item-heading">' + key + '</h4></li>');
                 });
                 $step2.find("#loading").hide();
             },
@@ -131,13 +108,12 @@ $(document).ready(function() {
             data: {"movie": movie_name},
             cache: false,
             success: function(data) {
-                console.log(data);
                 var $step3 = $("#step-3");
-                $.each(data, function(key, val){
+                $.each(data, function(key, val) {
                     $step3.find(".list-group").append('<li class="list-group-item" id="' + val["url"] +
-                        '"><h4 class="list-group-item-heading">' + key +
-                        '</h4><p class="list-group-item-text">' + val["description"] +
-                        '</p></li>');
+                            '"><h4 class="list-group-item-heading">' + key +
+                            '</h4><p class="list-group-item-text">' + val["description"] +
+                            '</p></li>');
                 });
                 $step3.find("#loading").hide();
             },
@@ -212,53 +188,134 @@ $(document).ready(function() {
             });
         } else {
             var $steps = $('#steps');
+            $('.generation').remove();
             $steps.collapse('hide');
             $('#steps').after('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $('#steps').after('<div id="loading" class="col-xs-12 page_earnings" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
+            $steps.css('display', '');
             var $pageViewsLoading = $('.page_views_loading');
-                $pageViewsLoading.append(new Spinner(opts).spin().el);
-           $.ajax({
-            type: "POST",
-            url: "/getwikipageviews",
-            data: {"wikiname": step_1, "boxofficemojoname": step_2},
-            cache: false,
-            success: function(data) {
-                $('.generation').remove();
-                $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
-                $steps.css('display', '');
-                var sorted_data = [];
-                $.each( data, function( key, value ) {
-                    sorted_data.push({"date": key, "value": value});
-                });
+            var $earningsLoading = $('.page_earnings');
+            $pageViewsLoading.append(new Spinner(opts).spin().el);
+            $earningsLoading.append(new Spinner(opts).spin().el);
 
-                sorted_data.sort(function(a,b){
-                    return new Date(b.date) - new Date(a.date);
-                });
+            $.ajax({
+                type: "POST",
+                url: "/getwikipageviews",
+                data: {"wikiname": step_1, "boxofficemojoname": step_2},
+                cache: false,
+                success: function(data) {
+                    $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"><h2>Wiki Page Views</h2></div>');
+                    $('#graph-pageviews').append('<div class="generation" id="chart_page_views"><svg></svg></div>');
+                    var sorted_data = [];
+                    $.each(data, function(key, value) {
+                        var date = Date.parse(key.substring(0, 10));
+                        sorted_data.push([date, value]);
+                    });
 
-                console.log(JSON.stringify(sorted_data));
+                    sorted_data.sort(function(x, y) {
+                        return x[0] - y[0];
+                    })
 
-                $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"></div>');
+                    var data_set = [
+                        {
+                            "key": "Page views",
+                            "values": sorted_data
+                        }
+                    ]
 
-                var graph = d3.select("#graph-pageviews")
-                    .attr("width", width + margin*2)
-                    .attr("height", height + margin*2)
-                    .append("g")
-                    .attr("transform", "translate(" + margin + "," + margin + ")");
+                    nv.addGraph(function() {
+                        var chart = nv.models.lineWithFocusChart()
+                                .x(function(d) {
+                            return d[0]
+                        })
+                                .y(function(d) {
+                            return d[1]
+                        })
+                                .color(d3.scale.category10().range());
 
-                var chartBody = graph.append("g")
-                    .attr("clip-path", "url(#clip)");
+                        //nv.models.lineWithFocusChart();
 
-                chartBody.append("svg:path")
-                    .datum(sorted_data)
-                    .attr("class", "line")
-                    .attr("d", line);
+                        chart.xAxis
+                                .tickFormat(function(d) {
+                            return d3.time.format('%x')(new Date(d));
+                        });
 
-                $pageViewsLoading.remove();
+                        chart.x2Axis
+                                .tickFormat(function(d) {
+                            return d3.time.format('%x')(new Date(d));
+                        });
 
-            },
-            error: function(data) {
-                console.log(data);
-            }
-        });
+                        chart.yAxis.tickFormat(d3.format('10'));
+
+                        chart.y2Axis.tickFormat(d3.format('10'));
+
+                        d3.select('#chart_page_views svg')
+                                .datum(data_set)
+                                .transition().duration(500)
+                                .call(chart);
+
+                        nv.utils.windowResize(chart.update);
+
+                        return chart;
+                    });
+
+                    $pageViewsLoading.remove();
+
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/getfirstsevendaysearnings",
+                data: {"boxofficemojoname": step_2},
+                cache: false,
+                success: function(data) {
+                    $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>BoxOfficeMojo Earnings <small>First 7 days</small></h2></div>');
+                    $('#graph-earnings').append('<div class="generation" id="chart_earnings"><svg></svg></div>');
+
+                    var final_data = [];
+                    $.each(data, function(index, value) {
+                        final_data.push({"label": "Day "+ (index+1), "value": value});
+                    });
+
+                    var data_set = [
+                        {
+                            "key": "Earnings",
+                            "values": final_data
+                        }
+                    ]
+
+                    console.log(JSON.stringify(data_set));
+
+                    nv.addGraph(function() {
+                        var chart = nv.models.discreteBarChart()
+                            .x(function(d) {return d.label})
+                            .y(function(d) {return d.value})
+                            .staggerLabels(true)
+                            .tooltips(false)
+                            .showValues(true);
+
+                        d3.select('#chart_earnings svg')
+                                .datum(data_set)
+                                .transition().duration(500)
+                                .call(chart);
+
+                        nv.utils.windowResize(chart.update);
+
+                        return chart;
+                    });
+
+                    $earningsLoading.remove();
+
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
         }
     });
 });
