@@ -31,10 +31,8 @@ class YouTube():
         videos = {}
 
         for search_result in search_response.get("items", []):
-            try:
+            if "videoId" in search_result["id"]:
                 videos[search_result["snippet"]["title"]] = search_result["id"]["videoId"]
-            except:
-                continue
 
         return videos
 
