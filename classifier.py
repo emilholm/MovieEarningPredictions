@@ -22,11 +22,7 @@ class Classifier():
         negfeats = [(self.word_feats(movie_reviews.words(fileids=[f])), 'neg') for f in negids]
         posfeats = [(self.word_feats(movie_reviews.words(fileids=[f])), 'pos') for f in posids]
 
-        #negcutoff = len(negfeats)*3/4
-        #poscutoff = len(posfeats)*3/4
-
         trainfeats = negfeats + posfeats
-        #testfeats = negfeats[negcutoff:] + posfeats[poscutoff:]
 
         self.classifier = NaiveBayesClassifier.train(trainfeats)
 
@@ -48,18 +44,21 @@ class Classifier():
         words = re.findall(pattern, text)
         stemmedWords = ''
 
+        wordlist = []
+
         for word in words:
             try:
-                stemmedWords = stemmedWords + ' ' + porter.stem(word)
+                wordlist.append(porter.stem(word))
+                #stemmedWords = stemmedWords + ' ' + porter.stem(word)
                 #words.append(porter.stem(word))
             except:
                 continue
 
-        print stemmedWords
+        #print stemmedWords
 
-        tokenizedWords = nltk.tokenize.sent_tokenize(stemmedWords)
+        tokenizedWords = nltk.tokenize.sent_tokenize(word) #stemmedWords)
 
-        negScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('neg') #classifier
+        negScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('neg')
         posScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('pos')
         return {'neg': negScore, 'pos': posScore}
 
