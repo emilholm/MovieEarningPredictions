@@ -1,10 +1,9 @@
 __author__ = 'Martin Skytte'
 
-from urllib2 import urlopen, quote
+from urllib2 import urlopen
 from json import load
 from datetime import datetime
 from dateutil import rrule
-from pprint import pprint
 
 
 class WikiPageViews():
@@ -42,7 +41,7 @@ class WikiPageViews():
         :param year_month:
         :return json:"""
 
-        url = self.baseUrl + year_month + "/" + quote(name)
+        url = self.baseUrl + year_month + "/" + name
         page_data = urlopen(url)
         json_object = load(page_data)
         return json_object
@@ -66,7 +65,7 @@ class WikiPageViews():
             for key, value in objects.iteritems():
                 tmp_key = 0
 
-                #check for exception, because non valid dates are given from the server
+                # check for exception, because non valid dates are given from the server
                 try:
                     tmp_key = datetime.strptime(key, "%Y-%m-%d")
                 except ValueError as e:
@@ -75,11 +74,4 @@ class WikiPageViews():
                 if tmp_key != 0:
                     final_dict[tmp_key] = value
 
-        return [(k, v) for k, v in sorted(final_dict.iteritems())]
-
-
-wiki = WikiPageViews()
-#pageviews = wiki.get_current_month_page_views("John_Wick_(film)")
-#print dumps(pageviews, indent=4, separators=(',', ': '))
-pprint(wiki.get_page_views_from_to("John_Wick_(film)", datetime.strptime("2013-12-01", "%Y-%m-%d"),
-                                  datetime.strptime("2014-11-17", "%Y-%m-%d")))
+        return {k: v for k, v in final_dict.iteritems()}

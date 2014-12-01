@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Martin Skytte'
 
-from urllib2 import urlopen, quote
-from json import load, dumps
+from urllib2 import urlopen, quote, unquote
+from json import load
+from xml.dom import minidom
+from datetime import datetime
 
 
 class WikiSimpleAPIFunctions:
@@ -17,36 +20,30 @@ class WikiSimpleAPIFunctions:
         :param search_term:
         :return list:
         """
-        url = self.base_url + "opensearch&search=" + quote(search_term)
+        url = self.base_url + "opensearch&format=xml&search=" + quote(search_term)
         page_data = urlopen(url)
-        json_object = load(page_data)
-        return json_object[1]
+        xml = minidom.parse(page_data)
+        return {node.getElementsByTagName("Text")[0].firstChild.data: dict(
+            description=node.getElementsByTagName("Description")[0].firstChild.data,
+            url=node.getElementsByTagName("Url")[0].firstChild.data.rsplit("/", 1)[1])
+            for node in xml.getElementsByTagName("Item")}
 
     def page_created_date(self, page_name):
-        """
+        """Returns the first date the revision of a page from Wikipedia, which is the
+        date a Wikipedia page is created.
 
         :param page_name:
-        :return:
+        :return datetime:
         """
         url = self.base_url + "query&rawcontinue=true&prop=revisions&rvprop=timestamp&" \
-                              "rvdir=newer&rvlimit=1&format=json&titles=" + quote(page_name)
+                              "rvdir=newer&rvlimit=1&format=json&titles=" + page_name
         page_data = urlopen(url)
         json_object = load(page_data)
-        return json_object
+        revisions = json_object['query']['pages'].values()[0]
+        date = None
+        if "revisions" not in revisions:
+            print "key not found"
+        else:
+            date = datetime.strptime(revisions['revisions'][0]['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
 
-wiki = WikiSimpleAPIFunctions()
-list = wiki.search_suggestions("j")
-print list
-list = wiki.search_suggestions("jo")
-print list
-list = wiki.search_suggestions("joh")
-print list
-list = wiki.search_suggestions("john")
-print list
-list = wiki.search_suggestions("john wick")
-print list
-list = wiki.search_suggestions("me myself")
-print list
-
-created_date = wiki.page_created_date("John_Wick_(film)")
-print dumps(created_date, sort_keys=True, indent=4, separators=(',', ': '))
+        return date

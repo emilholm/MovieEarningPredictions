@@ -27,6 +27,27 @@ $(document).ready(function() {
         $(this).append(new Spinner(opts).spin().el);
     });
 
+    // graph vars
+    var margin = 40;
+    var width = 960 - margin*2;
+    var height = 500 - margin*2;
+    var xScale = d3.time.scale()
+        .range([0, width])
+        .nice(d3.time.year);
+    var yScale = d3.scale.linear()
+        .range([height, 0])
+        .nice();
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+    var line = d3.svg.line()
+        .x(function(d) { return xScale(Date.parse(d.date.substring(0, 10))); })
+        .y(function(d) { return yScale(d.value); });
+
+
     // activate item
     $('body').on('click', '.list-group .list-group-item', function () {
         var $listgroup = $(this).closest('.list-group');
@@ -190,17 +211,49 @@ $(document).ready(function() {
                 confirmButtonText: 'Ok!'
             });
         } else {
+            var $steps = $('#steps');
+            $steps.collapse('hide');
+            $('#steps').after('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
+            var $pageViewsLoading = $('.page_views_loading');
+                $pageViewsLoading.append(new Spinner(opts).spin().el);
            $.ajax({
             type: "POST",
             url: "/getwikipageviews",
-            data: {"wikiname": step_1},
+            data: {"wikiname": step_1, "boxofficemojoname": step_2},
             cache: false,
             success: function(data) {
                 $('.generation').remove();
-                $('#steps').after('<button id="generate-data" class="generation btn btn-primary pull-right">Generate Data</button>').fadeIn();
-                $('#steps').after('<button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button>').fadeIn();
+                $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
+                $steps.css('display', '');
+                var sorted_data = [];
+                $.each( data, function( key, value ) {
+                    sorted_data.push({"date": key, "value": value});
+                });
 
-                console.log(data);
+                sorted_data.sort(function(a,b){
+                    return new Date(b.date) - new Date(a.date);
+                });
+
+                console.log(JSON.stringify(sorted_data));
+
+                $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"></div>');
+
+                var graph = d3.select("#graph-pageviews")
+                    .attr("width", width + margin*2)
+                    .attr("height", height + margin*2)
+                    .append("g")
+                    .attr("transform", "translate(" + margin + "," + margin + ")");
+
+                var chartBody = graph.append("g")
+                    .attr("clip-path", "url(#clip)");
+
+                chartBody.append("svg:path")
+                    .datum(sorted_data)
+                    .attr("class", "line")
+                    .attr("d", line);
+
+                $pageViewsLoading.remove();
+
             },
             error: function(data) {
                 console.log(data);

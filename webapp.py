@@ -3,11 +3,12 @@ __author__ = 'Martin Skytte'
 import cherrypy
 from webbrowser import open as wbopen
 from simplejson import dumps
-from urllib2 import unquote
 import os
 from WikiSimpleAPIFunctions import WikiSimpleAPIFunctions
 from BoxOfficeMojo import BoxOfficeMojo
 from WikiPageViews import WikiPageViews
+from YouTube import YouTube
+from optparse import OptionParser
 
 WEB_DIR = os.path.join(os.path.abspath("."), u"web")
 
@@ -22,6 +23,7 @@ class WebApp(object):
         self.wikipageviews = WikiPageViews()
         self.boxofficemojo = BoxOfficeMojo()
         self.wikifunctions = WikiSimpleAPIFunctions()
+        # self.youtube = YouTube()
 
     @cherrypy.expose
     def index(self):
@@ -43,14 +45,28 @@ class WebApp(object):
         return dumps(self.boxofficemojo.get_search_results(movie))
 
     @cherrypy.expose
-    def getwikipageviews(self, wikiname):
-        name = wikiname.encode('utf-8')
-        print wikiname
-        created_date = self.wikifunctions.page_created_date(name)
-        print created_date
-        cherrypy.response.headers['Content-Type'] = 'application/json'
-        return dumps(created_date)
+    def searchyoutubetrailer(self, movie):
+        # parser = OptionParser()
+        # parser.add_argument("--q", help="Search term", default=movie + " trailer")
+        # parser.add_argument("--max-results", help="Max results", default=15)
+        # parser.add_argument("--order", help="View Count", default="viewCount")
+        # options = parser.parse_args()
 
+        # cherrypy.response.headers['Content-Type'] = 'application/json'
+        # return dumps(self.youtube.youtube_search(options))
+        return "hej"
+
+    @cherrypy.expose
+    def getwikipageviews(self, wikiname, boxofficemojoname):
+        wiki_name = wikiname.encode('utf-8')
+        box_name = boxofficemojoname.encode('utf-8')
+        created_date = self.wikifunctions.page_created_date(wiki_name)
+        release_date = self.boxofficemojo.get_release_date(box_name)
+        page_views = self.wikipageviews.get_page_views_from_to(wiki_name, created_date, release_date)
+        print page_views
+        result = {str(key): value for key, value in sorted(page_views.iteritems())}
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return dumps(result)
 
 
 def open_page():
