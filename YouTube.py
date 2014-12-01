@@ -37,11 +37,14 @@ class YouTube():
 
     def youtube_comments(self, video_id, until_date):
         comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
+        comment_str = ''
         while comment_feed is not None:
             for comment in comment_feed.entry:
                 date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
                 if (date <= until_date):
-                    yield comment
+                    if comment.content.text is not None:
+                        print comment.content.text
+                        comment_str = comment_str + ' ' + comment.content.text
             next_link = comment_feed.GetNextLink()
             if next_link is None:
                 comment_feed = None
@@ -52,6 +55,7 @@ class YouTube():
                     IOError
                     continue
 
+        return comment_str
 
 def main():
     y = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
