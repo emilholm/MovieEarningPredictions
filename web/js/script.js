@@ -27,27 +27,6 @@ $(document).ready(function() {
         $(this).append(new Spinner(opts).spin().el);
     });
 
-    // graph vars
-    var margin = 40;
-    var width = 960 - margin*2;
-    var height = 500 - margin*2;
-    var xScale = d3.time.scale()
-        .range([0, width])
-        .nice(d3.time.year);
-    var yScale = d3.scale.linear()
-        .range([height, 0])
-        .nice();
-    var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom");
-    var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left");
-    var line = d3.svg.line()
-        .x(function(d) { return xScale(Date.parse(d.date.substring(0, 10))); })
-        .y(function(d) { return yScale(d.value); });
-
-
     // activate item
     $('body').on('click', '.list-group .list-group-item', function () {
         var $listgroup = $(this).closest('.list-group');
@@ -91,7 +70,6 @@ $(document).ready(function() {
             data: {"movie": movie_name},
             cache: false,
             success: function(data) {
-                console.log(data);
                 var $step1 = $("#step-1");
                 $.each(data, function(key, val){
                     $step1.find(".list-group").append('<li class="list-group-item" id="' + decodeURIComponent(val["url"]) +
@@ -112,7 +90,6 @@ $(document).ready(function() {
             data: {"movie": movie_name},
             cache: false,
             success: function (data) {
-                console.log(data);
                 var $step2 = $("#step-2");
                 $.each(data, function(key, val){
                     $step2.find(".list-group").append('<li class="list-group-item" id="' + val +
@@ -131,7 +108,6 @@ $(document).ready(function() {
             data: {"movie": movie_name},
             cache: false,
             success: function(data) {
-                console.log(data);
                 var $step3 = $("#step-3");
                 $.each(data, function(key, val){
                     $step3.find(".list-group").append('<li class="list-group-item" id="' + val["url"] +
@@ -212,6 +188,7 @@ $(document).ready(function() {
             });
         } else {
             var $steps = $('#steps');
+            $('.generation').remove();
             $steps.collapse('hide');
             $('#steps').after('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
             var $pageViewsLoading = $('.page_views_loading');
@@ -222,35 +199,59 @@ $(document).ready(function() {
             data: {"wikiname": step_1, "boxofficemojoname": step_2},
             cache: false,
             success: function(data) {
-                $('.generation').remove();
+
                 $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
                 $steps.css('display', '');
+                $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"><h2>Wiki Page Views</h2></div>');
+                $('#graph-pageviews').append('<div class="generation" id="chart_page_views"><svg></svg></div>');
                 var sorted_data = [];
                 $.each( data, function( key, value ) {
-                    sorted_data.push({"date": key, "value": value});
+                    var date = Date.parse(key.substring(0,10));
+                    sorted_data.push([date, value]);
                 });
 
-                sorted_data.sort(function(a,b){
-                    return new Date(b.date) - new Date(a.date);
+                sorted_data.sort(function(x, y){
+                    return x[0] - y[0];
+                })
+
+                var data_set = [
+                    {
+                        "key": "Page views",
+                        "values":sorted_data
+                    }
+                ]
+
+                nv.addGraph(function() {
+                  var chart = nv.models.lineWithFocusChart()
+                                .x(function(d) { return d[0] })
+                                .y(function(d) { return d[1] })
+                                .color(d3.scale.category10().range());
+
+                      //nv.models.lineWithFocusChart();
+
+                    chart.xAxis
+                        .tickFormat(function(d) {
+                        return d3.time.format('%x')(new Date(d));
+                        });
+
+                    chart.x2Axis
+                        .tickFormat(function(d) {
+                        return d3.time.format('%x')(new Date(d));
+                        });
+
+                    chart.yAxis.tickFormat(d3.format('10'));
+
+                    chart.y2Axis.tickFormat(d3.format('10'));
+
+                  d3.select('#chart_page_views svg')
+                    .datum(data_set)
+                    .transition().duration(500)
+                    .call(chart);
+
+                  nv.utils.windowResize(chart.update);
+
+                  return chart;
                 });
-
-                console.log(JSON.stringify(sorted_data));
-
-                $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"></div>');
-
-                var graph = d3.select("#graph-pageviews")
-                    .attr("width", width + margin*2)
-                    .attr("height", height + margin*2)
-                    .append("g")
-                    .attr("transform", "translate(" + margin + "," + margin + ")");
-
-                var chartBody = graph.append("g")
-                    .attr("clip-path", "url(#clip)");
-
-                chartBody.append("svg:path")
-                    .datum(sorted_data)
-                    .attr("class", "line")
-                    .attr("d", line);
 
                 $pageViewsLoading.remove();
 

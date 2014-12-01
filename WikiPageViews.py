@@ -46,20 +46,25 @@ class WikiPageViews():
         json_object = load(page_data)
         return json_object
 
-    def get_page_views_from_to(self, name, date_from, date_to):
+    def get_page_views_from_to_by_monthly(self, name, date_from, date_to):
         """Get page views from a wiki page with a specific name between two dates, ordered by the smallest date.
 
         The function expects the server response be in json and have the object daily_views.
         Also the daily_views has to have the key name be a date in the format of Y-m-d
+
+        This function is inspired by:
+        http://stackoverflow.com/questions/153584/how-to-iterate-over-a-timespan-after-days-hours-weeks-and-months-in-python
 
         :param name:
         :param date_from:
         :param date_to:
         :return list:
         """
+        start_date = datetime(date_from.year, date_from.month, 1)
+        end_date = datetime(date_to.year, date_to.month, 1)
 
         final_dict = {}
-        for dt in rrule.rrule(rrule.MONTHLY, dtstart=date_from, until=date_to):
+        for dt in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
             json_objects = self.get_page_views_from_name_year_month(name, dt.strftime("%Y%m"))
             objects = json_objects['daily_views']
             for key, value in objects.iteritems():
