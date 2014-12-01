@@ -28,14 +28,14 @@ $(document).ready(function() {
     });
 
     // activate item
-    $('body').on('click', '.list-group .list-group-item', function () {
+    $('body').on('click', '.list-group .list-group-item', function() {
         var $listgroup = $(this).closest('.list-group');
         var id = $listgroup.attr('id');
-        if(id == 1) {
+        if (id == 1) {
             step_1 = $(this).attr('id');
-        } else if(id == 2) {
+        } else if (id == 2) {
             step_2 = $(this).attr('id');
-        } else if(id == 3) {
+        } else if (id == 3) {
             step_3 = $(this).attr('id');
         }
         $listgroup.find('li.active').removeClass('active');
@@ -59,7 +59,7 @@ $(document).ready(function() {
         $("#loading").show();
 
         // get data and make it look fancy
-        $('h2').each(function () {
+        $('h2').each(function() {
             $(this).append();
         });
         $('#steps').collapse('show');
@@ -71,11 +71,11 @@ $(document).ready(function() {
             cache: false,
             success: function(data) {
                 var $step1 = $("#step-1");
-                $.each(data, function(key, val){
+                $.each(data, function(key, val) {
                     $step1.find(".list-group").append('<li class="list-group-item" id="' + decodeURIComponent(val["url"]) +
-                        '"><h4 class="list-group-item-heading">' + key +
-                        '</h4><p class="list-group-item-text">' + val["description"] +
-                        '</p></li>');
+                            '"><h4 class="list-group-item-heading">' + key +
+                            '</h4><p class="list-group-item-text">' + val["description"] +
+                            '</p></li>');
                 });
                 $step1.find("#loading").hide();
             },
@@ -89,11 +89,11 @@ $(document).ready(function() {
             url: "/searchboxofficemojo",
             data: {"movie": movie_name},
             cache: false,
-            success: function (data) {
+            success: function(data) {
                 var $step2 = $("#step-2");
-                $.each(data, function(key, val){
+                $.each(data, function(key, val) {
                     $step2.find(".list-group").append('<li class="list-group-item" id="' + val +
-                        '"><h4 class="list-group-item-heading">' + key + '</h4></li>');
+                            '"><h4 class="list-group-item-heading">' + key + '</h4></li>');
                 });
                 $step2.find("#loading").hide();
             },
@@ -109,11 +109,11 @@ $(document).ready(function() {
             cache: false,
             success: function(data) {
                 var $step3 = $("#step-3");
-                $.each(data, function(key, val){
+                $.each(data, function(key, val) {
                     $step3.find(".list-group").append('<li class="list-group-item" id="' + val["url"] +
-                        '"><h4 class="list-group-item-heading">' + key +
-                        '</h4><p class="list-group-item-text">' + val["description"] +
-                        '</p></li>');
+                            '"><h4 class="list-group-item-heading">' + key +
+                            '</h4><p class="list-group-item-text">' + val["description"] +
+                            '</p></li>');
                 });
                 $step3.find("#loading").hide();
             },
@@ -191,75 +191,131 @@ $(document).ready(function() {
             $('.generation').remove();
             $steps.collapse('hide');
             $('#steps').after('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $('#steps').after('<div id="loading" class="col-xs-12 page_earnings" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
+            $steps.css('display', '');
             var $pageViewsLoading = $('.page_views_loading');
-                $pageViewsLoading.append(new Spinner(opts).spin().el);
-           $.ajax({
-            type: "POST",
-            url: "/getwikipageviews",
-            data: {"wikiname": step_1, "boxofficemojoname": step_2},
-            cache: false,
-            success: function(data) {
+            var $earningsLoading = $('.page_earnings');
+            $pageViewsLoading.append(new Spinner(opts).spin().el);
+            $earningsLoading.append(new Spinner(opts).spin().el);
 
-                $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
-                $steps.css('display', '');
-                $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"><h2>Wiki Page Views</h2></div>');
-                $('#graph-pageviews').append('<div class="generation" id="chart_page_views"><svg></svg></div>');
-                var sorted_data = [];
-                $.each( data, function( key, value ) {
-                    var date = Date.parse(key.substring(0,10));
-                    sorted_data.push([date, value]);
-                });
+            $.ajax({
+                type: "POST",
+                url: "/getwikipageviews",
+                data: {"wikiname": step_1, "boxofficemojoname": step_2},
+                cache: false,
+                success: function(data) {
+                    $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"><h2>Wiki Page Views</h2></div>');
+                    $('#graph-pageviews').append('<div class="generation" id="chart_page_views"><svg></svg></div>');
+                    var sorted_data = [];
+                    $.each(data, function(key, value) {
+                        var date = Date.parse(key.substring(0, 10));
+                        sorted_data.push([date, value]);
+                    });
 
-                sorted_data.sort(function(x, y){
-                    return x[0] - y[0];
-                })
+                    sorted_data.sort(function(x, y) {
+                        return x[0] - y[0];
+                    })
 
-                var data_set = [
-                    {
-                        "key": "Page views",
-                        "values":sorted_data
-                    }
-                ]
+                    var data_set = [
+                        {
+                            "key": "Page views",
+                            "values": sorted_data
+                        }
+                    ]
 
-                nv.addGraph(function() {
-                  var chart = nv.models.lineWithFocusChart()
-                                .x(function(d) { return d[0] })
-                                .y(function(d) { return d[1] })
+                    nv.addGraph(function() {
+                        var chart = nv.models.lineWithFocusChart()
+                                .x(function(d) {
+                            return d[0]
+                        })
+                                .y(function(d) {
+                            return d[1]
+                        })
                                 .color(d3.scale.category10().range());
 
-                      //nv.models.lineWithFocusChart();
+                        //nv.models.lineWithFocusChart();
 
-                    chart.xAxis
-                        .tickFormat(function(d) {
-                        return d3.time.format('%x')(new Date(d));
+                        chart.xAxis
+                                .tickFormat(function(d) {
+                            return d3.time.format('%x')(new Date(d));
                         });
 
-                    chart.x2Axis
-                        .tickFormat(function(d) {
-                        return d3.time.format('%x')(new Date(d));
+                        chart.x2Axis
+                                .tickFormat(function(d) {
+                            return d3.time.format('%x')(new Date(d));
                         });
 
-                    chart.yAxis.tickFormat(d3.format('10'));
+                        chart.yAxis.tickFormat(d3.format('10'));
 
-                    chart.y2Axis.tickFormat(d3.format('10'));
+                        chart.y2Axis.tickFormat(d3.format('10'));
 
-                  d3.select('#chart_page_views svg')
-                    .datum(data_set)
-                    .transition().duration(500)
-                    .call(chart);
+                        d3.select('#chart_page_views svg')
+                                .datum(data_set)
+                                .transition().duration(500)
+                                .call(chart);
 
-                  nv.utils.windowResize(chart.update);
+                        nv.utils.windowResize(chart.update);
 
-                  return chart;
-                });
+                        return chart;
+                    });
 
-                $pageViewsLoading.remove();
+                    $pageViewsLoading.remove();
 
-            },
-            error: function(data) {
-                console.log(data);
-            }
-        });
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/getfirstsevendaysearnings",
+                data: {"boxofficemojoname": step_2},
+                cache: false,
+                success: function(data) {
+                    $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>BoxOfficeMojo Earnings <small>First 7 days</small></h2></div>');
+                    $('#graph-earnings').append('<div class="generation" id="chart_earnings"><svg></svg></div>');
+
+                    var final_data = [];
+                    $.each(data, function(index, value) {
+                        final_data.push({"label": "Day "+ (index+1), "value": value});
+                    });
+
+                    var data_set = [
+                        {
+                            "key": "Earnings",
+                            "values": final_data
+                        }
+                    ]
+
+                    console.log(JSON.stringify(data_set));
+
+                    nv.addGraph(function() {
+                        var chart = nv.models.discreteBarChart()
+                            .x(function(d) {return d.label})
+                            .y(function(d) {return d.value})
+                            .staggerLabels(true)
+                            .tooltips(false)
+                            .showValues(true);
+
+                        d3.select('#chart_earnings svg')
+                                .datum(data_set)
+                                .transition().duration(500)
+                                .call(chart);
+
+                        nv.utils.windowResize(chart.update);
+
+                        return chart;
+                    });
+
+                    $earningsLoading.remove();
+
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
         }
     });
 });

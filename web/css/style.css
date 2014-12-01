@@ -6,6 +6,10 @@
   height: 400px;
 }
 
+#chart_earnings svg {
+  height: 400px;
+}
+
 .axis path,
 .axis line {
   fill: none;
