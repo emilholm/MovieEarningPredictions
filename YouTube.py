@@ -31,7 +31,10 @@ class YouTube():
         videos = {}
 
         for search_result in search_response.get("items", []):
-            videos[search_result["snippet"]["title"]] = search_result["id"]["videoId"]
+            try:
+                videos[search_result["snippet"]["title"]] = search_result["id"]["videoId"]
+            except:
+                continue
 
         return videos
 
@@ -59,14 +62,8 @@ class YouTube():
 
 def main():
     y = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
-    video_id = "TvCWWATPWbs"
-    for comment in y.youtube_comments(video_id, datetime(2013,10,1)):
-        text = comment.content.text
-        print text
-
-
-    #blabla = y.youtube_search('Dumb and dumber to trailer', results=10)
-    #print blabla
+    blabla = y.youtube_search('Interstellar trailer', results=10)
+    print blabla
 
 if __name__ == '__main__':
     main()
