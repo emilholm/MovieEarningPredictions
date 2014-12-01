@@ -20,13 +20,8 @@ class YouTube():
         self.youtube = build(youtube_api_service_name, youtube_api_version, developerKey=developer_key)
 
     def youtube_search(self, title, results=50, order_by='viewCount'):
-        argparser.add_argument("--q", help="Search term", default=title)
-        argparser.add_argument("--max-results", help="Max results", default=results)
-        argparser.add_argument("--order", help="View Count", default=order_by)
-        args = argparser.parse_args()
-
-        search_response = self.youtube.search().list(q=args.q, part="id,snippet",
-                                                     maxResults=args.max_results).execute()
+        search_response = self.youtube.search().list(q=title, part="id,snippet",
+                                                     maxResults=results).execute()
 
         videos = {}
 
@@ -60,6 +55,10 @@ class YouTube():
 
 def main():
     y = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
+    blabla = y.youtube_search('Interstellar trailer', results=10)
+    print blabla
+    blabla = y.youtube_search('Interstellar', results=10)
+    print blabla
     blabla = y.youtube_search('Interstellar trailer', results=10)
     print blabla
 
