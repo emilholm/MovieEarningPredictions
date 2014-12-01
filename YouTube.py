@@ -79,11 +79,14 @@ class YouTube():
         self.yts = gdata.youtube.service.YouTubeService()
         self.youtube = build(youtube_api_service_name, youtube_api_version, http=http)
 
-    def youtube_search(self, options):
-        # Call the search.list method to retrieve results matching the specified
-        # query term.
-        search_response = self.youtube.search().list(q=options.q, part="id,snippet",
-                                                     maxResults=options.max_results).execute()
+    def youtube_search(self, title, results=50, order_by='viewCount'):
+        argparser.add_argument("--q", help="Search term", default=title)
+        argparser.add_argument("--max-results", help="Max results", default=results)
+        argparser.add_argument("--order", help="View Count", default=order_by)
+        args = argparser.parse_args()
+
+        search_response = self.youtube.search().list(q=args.q, part="id,snippet",
+                                                     maxResults=args.max_results).execute()
 
         videos = {}
 
@@ -109,18 +112,15 @@ class YouTube():
 
 def main():
     y = YouTube()
-    video_id = "TvCWWATPWbs"
-    for comment in y.youtube_comments(video_id, datetime(2013,10,1)):
-        text = comment.content.text
-        text2 = comment.published.text
-        print text + text2
+    #video_id = "TvCWWATPWbs"
+    #for comment in y.youtube_comments(video_id, datetime(2013,10,1)):
+    #    text = comment.content.text
+    #    text2 = comment.published.text
+    #    print text + text2
 
-    # argparser.add_argument("--q", help="Search term", default="The Dark Knight Rises Trailer")
-    # argparser.add_argument("--max-results", help="Max results", default=50)
-    # argparser.add_argument("--order", help="View Count", default="viewCount")
-    # args = argparser.parse_args()
-    # blabla = y.youtube_search(args)
-    # print blabla
+
+    blabla = y.youtube_search('Dumb and dumber to trailer', results=10)
+    print blabla
 
 if __name__ == '__main__':
     main()
