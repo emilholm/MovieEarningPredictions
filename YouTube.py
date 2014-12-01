@@ -1,20 +1,10 @@
 #!/usr/bin/python
 
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from oauth2client.tools import argparser
-import httplib2
 __author__ = 'emill05'
-from datetime import datetime, timedelta
-import httplib2
-import os
-import sys
+from datetime import datetime
 import gdata.youtube.service
 from googleapiclient.discovery import build
-from oauth2client.file import Storage
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.tools import run
-from optparse import OptionParser
 
 
 class YouTube():
@@ -52,25 +42,27 @@ class YouTube():
                 date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
                 if (date <= until_date):
                     yield comment
-
-        next_link = comment_feed.GetNextLink()
-        if next_link is None:
-            comment_feed = None
-        else:
-            comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
+            next_link = comment_feed.GetNextLink()
+            if next_link is None:
+                comment_feed = None
+            else:
+                try:
+                    comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
+                except:
+                    IOError
+                    continue
 
 
 def main():
-    y = YouTube()
-    #video_id = "TvCWWATPWbs"
-    #for comment in y.youtube_comments(video_id, datetime(2013,10,1)):
-    #    text = comment.content.text
-    #    text2 = comment.published.text
-    #    print text + text2
+    y = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
+    video_id = "TvCWWATPWbs"
+    for comment in y.youtube_comments(video_id, datetime(2013,10,1)):
+        text = comment.content.text
+        print text
 
 
-    blabla = y.youtube_search('Dumb and dumber to trailer', results=10)
-    print blabla
+    #blabla = y.youtube_search('Dumb and dumber to trailer', results=10)
+    #print blabla
 
 if __name__ == '__main__':
     main()
