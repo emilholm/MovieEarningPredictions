@@ -23,7 +23,7 @@ class WebApp(object):
         self.wikipageviews = WikiPageViews()
         self.boxofficemojo = BoxOfficeMojo()
         self.wikifunctions = WikiSimpleAPIFunctions()
-        # self.youtube = YouTube()
+        self.youtube = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
 
     @cherrypy.expose
     def index(self):
@@ -46,15 +46,10 @@ class WebApp(object):
 
     @cherrypy.expose
     def searchyoutubetrailer(self, movie):
-        # parser = OptionParser()
-        # parser.add_argument("--q", help="Search term", default=movie + " trailer")
-        # parser.add_argument("--max-results", help="Max results", default=15)
-        # parser.add_argument("--order", help="View Count", default="viewCount")
-        # options = parser.parse_args()
-
-        # cherrypy.response.headers['Content-Type'] = 'application/json'
-        # return dumps(self.youtube.youtube_search(options))
-        return "hej"
+        title = movie.encode('utf-8')
+        result = self.youtube.youtube_search(title, results=10)
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return dumps(result)
 
     @cherrypy.expose
     def getwikipageviews(self, wikiname, boxofficemojoname):

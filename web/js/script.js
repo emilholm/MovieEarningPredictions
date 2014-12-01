@@ -104,16 +104,14 @@ $(document).ready(function() {
 
         $.ajax({
             type: "POST",
-            url: "/searchwiki",
-            data: {"movie": movie_name},
+            url: "/searchyoutubetrailer",
+            data: {"movie": movie_name + " trailer"},
             cache: false,
             success: function(data) {
                 var $step3 = $("#step-3");
                 $.each(data, function(key, val) {
-                    $step3.find(".list-group").append('<li class="list-group-item" id="' + val["url"] +
-                            '"><h4 class="list-group-item-heading">' + key +
-                            '</h4><p class="list-group-item-text">' + val["description"] +
-                            '</p></li>');
+                    $step3.find(".list-group").append('<li class="list-group-item" id="' + val +
+                            '"><h4 class="list-group-item-heading">' + key +'</h4></li>');
                 });
                 $step3.find("#loading").hide();
             },
