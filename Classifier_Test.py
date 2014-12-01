@@ -1,5 +1,5 @@
 __author__ = 'emill05'
-from Classifier import Classifier
+from Classifier_old import Classifier
 
 def classifier():
     c = Classifier()
