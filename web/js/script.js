@@ -44,9 +44,43 @@ $(document).ready(function() {
         $(this).toggleClass('active');
     });
 
+    //Wiki specific search
+    $('#wikisearchsubmit').click(function() {
+        step_1 = "";
+        $("#step-1").find('ul li').remove();
+
+        var internalWiki = $('#wikisearch').val();
+        $('.step_1_loading').show();
+
+        $.ajax({
+            type: "POST",
+            url: "/searchwiki",
+            data: {"movie": internalWiki},
+            cache: false,
+            success: function(data) {
+                var $step1 = $("#step-1");
+                $.each(data, function(key, val) {
+                    $step1.find(".list-group").append('<li class="list-group-item" id="' + decodeURIComponent(val["url"]) +
+                            '"><h4 class="list-group-item-heading">' + key +
+                            '</h4><p class="list-group-item-text">' + val["description"] +
+                            '</p></li>');
+                });
+                $('.step_1_loading').hide();
+            },
+            error: function(data) {
+                console.log(data);
+                $('.step_1_loading').hide();
+            }
+        });
+    });
+
     // search movies
     $('#search-movie-form').submit(function(e) {
         e.preventDefault();
+        var $step1 = $("#step-1");
+        var $step2 = $("#step-2");
+        var $step3 = $("#step-3");
+
         movie_name = $('#movie-name').val();
 
         // reset values
@@ -66,13 +100,14 @@ $(document).ready(function() {
         });
         $('#steps').collapse('show');
 
+        $('#wikisearch').val(movie_name);
+
         $.ajax({
             type: "POST",
             url: "/searchwiki",
             data: {"movie": movie_name},
             cache: false,
             success: function(data) {
-                var $step1 = $("#step-1");
                 $.each(data, function(key, val) {
                     $step1.find(".list-group").append('<li class="list-group-item" id="' + decodeURIComponent(val["url"]) +
                             '"><h4 class="list-group-item-heading">' + key +
@@ -83,6 +118,7 @@ $(document).ready(function() {
             },
             error: function(data) {
                 console.log(data);
+                $step1.find("#loading").hide();
             }
         });
 
@@ -92,7 +128,6 @@ $(document).ready(function() {
             data: {"movie": movie_name},
             cache: false,
             success: function(data) {
-                var $step2 = $("#step-2");
                 $.each(data, function(key, val) {
                     $step2.find(".list-group").append('<li class="list-group-item" id="' + val +
                             '"><h4 class="list-group-item-heading">' + key + '</h4></li>');
@@ -100,6 +135,7 @@ $(document).ready(function() {
                 $step2.find("#loading").hide();
             },
             error: function(data) {
+                $step2.find("#loading").hide();
                 console.log(data);
             }
         });
@@ -110,7 +146,6 @@ $(document).ready(function() {
             data: {"movie": movie_name + " trailer"},
             cache: false,
             success: function(data) {
-                var $step3 = $("#step-3");
                 $.each(data, function(key, val) {
                     $step3.find(".list-group").append('<li class="list-group-item" id="' + val +
                             '"><h4 class="list-group-item-heading">' + key +'</h4></li>');
@@ -118,6 +153,7 @@ $(document).ready(function() {
                 $step3.find("#loading").hide();
             },
             error: function(data) {
+                $step3.find("#loading").hide();
                 console.log(data);
             }
         });
@@ -190,11 +226,18 @@ $(document).ready(function() {
             var $steps = $('#steps');
             $('.generation').remove();
             $steps.collapse('hide');
-            $('#steps').after('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
-            $('#steps').after('<div id="loading" class="col-xs-12 page_earnings" style="margin-top:50px; margin-bottom: 50px"></div>');
-            $('#steps').after('<div id="loading" class="col-xs-12 youtube_comments" style="margin-top:50px; margin-bottom: 50px"></div>');
             $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
             $steps.css('display', '');
+            $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>BoxOfficeMojo Earnings <small>First 7 days</small></h2></div>');
+            $('#graph-earnings').append('<div class="generation" id="chart_earnings"><svg></svg></div>');
+            var $earningsgraph = $("#chart_earnings").hide();
+            $('#graph-earnings').append('<div id="loading" class="col-xs-12 page_earnings" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"><h2>Wiki Page Views</h2></div>');
+            $('#graph-pageviews').append('<div class="generation" id="chart_page_views"><svg></svg></div>');
+            var $pageviewsgraph = $("#chart_page_views").hide();
+            $('#graph-pageviews').append('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $('.hide_show_steps').after('<div id="analysis" class="generation col-xs-12"><h2>YouTube Comments</h2></div>');
+            $('#analysis').append('<div id="loading" class="col-xs-12 youtube_comments" style="margin-top:50px; margin-bottom: 50px"></div>');
             var $pageViewsLoading = $('.page_views_loading');
             var $earningsLoading = $('.page_earnings');
             var $analysis = $('.youtube_comments');
@@ -208,8 +251,6 @@ $(document).ready(function() {
                 data: {"wikiname": step_1, "boxofficemojoname": step_2},
                 cache: false,
                 success: function(data) {
-                    $('.hide_show_steps').after('<div id="graph-pageviews" class="generation col-xs-12"><h2>Wiki Page Views</h2></div>');
-                    $('#graph-pageviews').append('<div class="generation" id="chart_page_views"><svg></svg></div>');
                     var sorted_data = [];
                     $.each(data, function(key, value) {
                         var date = Date.parse(key.substring(0, 10));
@@ -225,7 +266,7 @@ $(document).ready(function() {
                             "key": "Page views",
                             "values": sorted_data
                         }
-                    ]
+                    ];
 
                     nv.addGraph(function() {
                         var chart = nv.models.lineWithFocusChart()
@@ -262,12 +303,13 @@ $(document).ready(function() {
 
                         return chart;
                     });
-
+                    $pageviewsgraph.fadeIn();
                     $pageViewsLoading.remove();
 
                 },
                 error: function(data) {
                     console.log(data);
+                    $pageViewsLoading.remove();
                 }
             });
 
@@ -277,9 +319,6 @@ $(document).ready(function() {
                 data: {"boxofficemojoname": step_2},
                 cache: false,
                 success: function(data) {
-                    $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>BoxOfficeMojo Earnings <small>First 7 days</small></h2></div>');
-                    $('#graph-earnings').append('<div class="generation" id="chart_earnings"><svg></svg></div>');
-
                     var final_data = [];
                     $.each(data, function(index, value) {
                         final_data.push({"label": "Day "+ (index+1), "value": value});
@@ -290,7 +329,7 @@ $(document).ready(function() {
                             "key": "Earnings",
                             "values": final_data
                         }
-                    ]
+                    ];
 
                     nv.addGraph(function() {
                         var chart = nv.models.discreteBarChart()
@@ -309,12 +348,13 @@ $(document).ready(function() {
 
                         return chart;
                     });
-
+                    $earningsgraph.fadeIn();
                     $earningsLoading.remove();
 
                 },
                 error: function(data) {
                     console.log(data);
+                    $earningsLoading.remove();
                 }
             });
 
@@ -324,7 +364,6 @@ $(document).ready(function() {
                 data: {"youtubeid": step_3, "boxofficemojoname": step_2},
                 cache: false,
                 success: function(data) {
-                    $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>YouTube Comments</h2></div>');
                     console.log(data)
 
                     $analysis.remove();
@@ -332,6 +371,7 @@ $(document).ready(function() {
                 },
                 error: function(data) {
                     console.log(data);
+                    $analysis.remove();
                 }
             });
         }

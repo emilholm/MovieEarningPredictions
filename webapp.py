@@ -89,11 +89,14 @@ class WebApp(object):
     @cherrypy.expose
     def getfirstsevendaysearnings(self, boxofficemojoname):
         """Return the first 7 days of earnings from BoxOfficeMojo"""
-
-        box_name = boxofficemojoname.encode('utf-8')
-        result = self.boxofficemojo.get_first_seven_days(box_name)
-        cherrypy.response.headers['Content-Type'] = 'application/json'
-        return dumps(result)
+        try:
+            box_name = boxofficemojoname.encode('utf-8')
+            result = self.boxofficemojo.get_first_seven_days(box_name)
+            cherrypy.response.headers['Content-Type'] = 'application/json'
+            return dumps(result)
+        except BoxOfficeMojoException as e:
+            cherrypy.response.headers['Content-Type'] = 'application/json'
+            return dumps({"error": e.message})
 
     @cherrypy.expose
     def sentimentanalysisytcomments(self, youtubeid, boxofficemojoname):
@@ -112,8 +115,9 @@ class WebApp(object):
         except BoxOfficeMojoException:
             current_date = datetime.now()
             comments = self.youtube.youtube_comments(youtube_id, current_date)
+            score = self.classifier.classify_text(comments)
             cherrypy.response.headers['Content-Type'] = 'application/json'
-            return dumps(score = self.classifier.classify_text(comments))
+            return dumps(score)
 
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Martin Skytte'
 
-from urllib2 import urlopen, quote, unquote
+from urllib2 import urlopen, quote
 from json import load
 from xml.dom import minidom
 from datetime import datetime
@@ -37,6 +37,7 @@ class WikiSimpleAPIFunctions:
         """
         url = self.base_url + "query&rawcontinue=true&prop=revisions&rvprop=timestamp&" \
                               "rvdir=newer&rvlimit=1&format=json&titles=" + page_name
+
         page_data = urlopen(url)
         json_object = load(page_data)
         revisions = json_object['query']['pages'].values()[0]

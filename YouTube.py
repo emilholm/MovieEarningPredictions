@@ -22,7 +22,6 @@ class YouTube():
     def youtube_search(self, title, results=50, order_by='viewCount'):
         search_response = self.youtube.search().list(q=title, part="id,snippet",
                                                      maxResults=results, order=order_by).execute()
-
         videos = {}
 
         for search_result in search_response.get("items", []):
