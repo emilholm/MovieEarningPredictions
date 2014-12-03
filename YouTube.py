@@ -55,12 +55,10 @@ class YouTube():
 
 def main():
     y = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
-    blabla = y.youtube_search('Interstellar trailer', results=10)
-    print blabla
-    blabla = y.youtube_search('Interstellar', results=10)
-    print blabla
-    blabla = y.youtube_search('Interstellar trailer', results=10)
-    print blabla
+    #blabla = y.youtube_search('Interstellar trailer', results=10)
+    #print blabla
+    comments = y.youtube_comments('vak9ZLfhGnQ', datetime(2014,10,10))
+    print comments
 
 if __name__ == '__main__':
     main()

@@ -45,32 +45,35 @@ class Classifier():
         """
 
         words = re.findall(pattern, text)
+        stemmedWords = []
+
+        forbidden_words = set(stopwords.words('english'))
 
         for word in words:
             try:
-                if word not in stopwords('english'):
+                if word not in forbidden_words:
                     #stemmedWords = stemmedWords + ' ' + porter.stem(word)
-                    words.append(porter.stem(word))
+                    stemmedWords.append(porter.stem(word))
                     #stemmedWords = stemmedWords + ' ' + word
             except:
                 continue
 
-        stemmedWords = ''
+        tokenizedWords = []
 
+        for word in stemmedWords:
+            try:
+                tokenizedWords.append(nltk.tokenize.word_tokenize(word))
+            except:
+                continue
+
+        #print tokenizedWords
+
+        #tokenizedWords = nltk.tokenize.sent_tokenize(stemmedWords)
         #for word in words:
-         #   try:
-                #stemmedWords = stemmedWords + ' ' + porter.stem(word)
-                #words.append(porter.stem(word))
-                #stemmedWords = stemmedWords + ' ' + word
-          #  except:
-           #     continue
 
-        print stemmedWords
 
-        tokenizedWords = nltk.tokenize.sent_tokenize(stemmedWords)
-
-        negScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('neg') #classifier
-        posScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('pos')
+        negScore = self.classifier.prob_classify(self.word_feats(stemmedWords)).prob('neg') #classifier
+        posScore = self.classifier.prob_classify(self.word_feats(stemmedWords)).prob('pos')
         return {'neg': negScore, 'pos': posScore}
 
 
