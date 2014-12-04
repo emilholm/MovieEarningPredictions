@@ -32,23 +32,19 @@ class YouTube():
 
     def youtube_comments(self, video_id, until_date):
         comment_str = ''
-
-        try:
-            comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
-            while comment_feed is not None:
-                for comment in comment_feed.entry:
-                    date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
-                    if (date <= until_date):
-                        if comment.content.text is not None:
-                            print comment.content.text
-                            comment_str = comment_str + ' ' + comment.content.text
-                next_link = comment_feed.GetNextLink()
-                if next_link is None:
-                    comment_feed = None
-                else:
-                    comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
-        except gdata.service.RequestError:
-            raise gdata.service.RequestError
+        comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
+        while comment_feed is not None:
+            for comment in comment_feed.entry:
+                date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
+                if (date <= until_date):
+                    if comment.content.text is not None:
+                        print comment.content.text
+                        comment_str = comment_str + ' ' + comment.content.text
+            next_link = comment_feed.GetNextLink()
+            if next_link is None:
+                comment_feed = None
+            else:
+                comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
 
         return comment_str
 

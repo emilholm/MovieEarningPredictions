@@ -370,14 +370,13 @@ $(document).ready(function() {
                 data: {"youtubeid": step_3, "boxofficemojoname": step_2},
                 cache: false,
                 success: function(data) {
-                    console.log(data)
-
-                    $analysis.remove();
-
-                },
-                error: function(data, textStatus) {
                     console.log(data);
-                    console.log(textStatus);
+                    $analysis.remove();
+                },
+                error: function(data) {
+                    var error = $.parseJSON(data.responseText);
+                    $('#analysis').append('<h3>' + error['error'] + '</h3>');
+                    console.log(data);
                     $analysis.remove();
                 }
             });

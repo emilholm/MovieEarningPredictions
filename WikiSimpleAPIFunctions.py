@@ -37,9 +37,6 @@ class WikiSimpleAPIFunctions:
         """
         url = self.base_url + "query&rawcontinue=true&prop=revisions&rvprop=timestamp&" \
                               "rvdir=newer&rvlimit=1&format=json&titles=" + page_name
-
-        print url
-
         page_data = urlopen(url)
         json_object = load(page_data)
         revisions = json_object['query']['pages'].values()[0]

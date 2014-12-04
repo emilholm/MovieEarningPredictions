@@ -11,6 +11,8 @@ from WikiPageViews import WikiPageViews
 from YouTube import YouTube
 from BoxOfficeMojoException import BoxOfficeMojoException
 from Classifier_old import Classifier
+from gdata.service import RequestError
+
 
 WEB_DIR = os.path.join(os.path.abspath("."), u"web")
 
@@ -114,10 +116,21 @@ class WebApp(object):
             return dumps(score)
         except BoxOfficeMojoException:
             current_date = datetime.now()
-            comments = self.youtube.youtube_comments(youtube_id, current_date)
+
+            try:
+                comments = self.youtube.youtube_comments(youtube_id, current_date)
+            except RequestError as e:
+                cherrypy.response.status = e.message['status']
+                cherrypy.response.headers['Content-Type'] = 'application/json'
+                return dumps({"error": e.message['body']})
+
             score = self.classifier.classify_text(comments)
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return dumps(score)
+        except RequestError as e:
+            cherrypy.response.status = e.message['status']
+            cherrypy.response.headers['Content-Type'] = 'application/json'
+            return dumps({"error": e.message['body']})
 
 
 
