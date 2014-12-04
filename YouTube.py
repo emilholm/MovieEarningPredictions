@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from oauth2client.tools import argparser
 __author__ = 'emill05'
 from datetime import datetime
 import gdata.youtube.service

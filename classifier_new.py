@@ -56,11 +56,15 @@ class Classifier():
 
         #print stemmedWords
 
-        tokenizedWords = nltk.tokenize.sent_tokenize(text) #stemmedWords)
+        counter = 0
+        for word in text.split():
+            counter = counter + 1
+
+        tokenizedWords = nltk.tokenize.word_tokenize(text) #stemmedWords)
 
         negScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('neg')
         posScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('pos')
-        return {'neg': negScore, 'pos': posScore}
+        return {'neg': negScore, 'pos': posScore, 'count' : counter}
 
 
 def main():
@@ -68,6 +72,7 @@ def main():
     score = c.classify_text('very bad terrible horrible boring')  #open('johnwickcomments.txt', 'r').read())
     print score['neg']
     print score['pos']
+    print score['count']
 
 if __name__ == '__main__':
     main()
