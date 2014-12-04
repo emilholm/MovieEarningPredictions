@@ -42,17 +42,17 @@ class Classifier():
         """
 
         words = re.findall(pattern, text)
-        #stemmedWords = ''
+        stemmedWords = ''
 
         #wordlist = []
 
-        #for word in words:
-        #    try:
-        #        #wordlist.append(porter.stem(word))
-        #        stemmedWords = stemmedWords + ' ' + porter.stem(word)
-        #        words.append(porter.stem(word))
-        #    except:
-        #        continue
+        for word in words:
+            try:
+                #wordlist.append(porter.stem(word))
+                stemmedWords = stemmedWords + ' ' + porter.stem(word)
+                #words.append(porter.stem(word))
+            except:
+                pass
 
         #print stemmedWords
 
@@ -60,7 +60,8 @@ class Classifier():
         for word in text.split():
             counter = counter + 1
 
-        tokenizedWords = nltk.tokenize.word_tokenize(text) #stemmedWords)
+        #tokenizedWords = nltk.tokenize.regexp_tokenize(text=text,pattern=pattern)
+        tokenizedWords = nltk.tokenize.word_tokenize(stemmedWords) #stemmedWords)
 
         negScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('neg')
         posScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('pos')
@@ -69,7 +70,7 @@ class Classifier():
 
 def main():
     c = Classifier()
-    score = c.classify_text('very bad terrible horrible boring')  #open('johnwickcomments.txt', 'r').read())
+    score = c.classify_text(open('johnwickcomments.txt', 'r').read())  #'very bad terrible horrible boring')
     print score['neg']
     print score['pos']
     print score['count']

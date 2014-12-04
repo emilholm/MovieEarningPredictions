@@ -10,7 +10,7 @@ from BoxOfficeMojo import BoxOfficeMojo
 from WikiPageViews import WikiPageViews
 from YouTube import YouTube
 from BoxOfficeMojoException import BoxOfficeMojoException
-from Classifier_old import Classifier
+from classifier_new import Classifier
 from gdata.service import RequestError
 
 

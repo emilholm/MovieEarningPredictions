@@ -30,10 +30,11 @@ class YouTube():
         return videos
 
     def youtube_comments(self, video_id, until_date):
+        iterator = 0;
         try:
             comment_str = ''
             comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
-            while comment_feed is not None:
+            while comment_feed is not None and iterator < 20:
                 for comment in comment_feed.entry:
                     date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
                     if (date <= until_date):
@@ -45,6 +46,7 @@ class YouTube():
                     comment_feed = None
                 else:
                     comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
+                iterator = iterator + 1
         except gdata.service.RequestError as e:
             if e.message['status'] == 503 and len(comment_str) > 1000:
                 pass
