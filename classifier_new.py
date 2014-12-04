@@ -43,6 +43,7 @@ class Classifier():
 
         words = re.findall(pattern, text)
         stemmedWords = ''
+        counter = 0
 
         #wordlist = []
 
@@ -50,15 +51,14 @@ class Classifier():
             try:
                 #wordlist.append(porter.stem(word))
                 stemmedWords = stemmedWords + ' ' + porter.stem(word)
+                counter = counter + 1
                 #words.append(porter.stem(word))
             except:
                 pass
 
         #print stemmedWords
 
-        counter = 0
-        for word in text.split():
-            counter = counter + 1
+
 
         #tokenizedWords = nltk.tokenize.regexp_tokenize(text=text,pattern=pattern)
         tokenizedWords = nltk.tokenize.word_tokenize(stemmedWords) #stemmedWords)
