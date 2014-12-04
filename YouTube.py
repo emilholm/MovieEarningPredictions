@@ -33,19 +33,22 @@ class YouTube():
     def youtube_comments(self, video_id, until_date):
         comment_str = ''
 
-        comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
-        while comment_feed is not None:
-            for comment in comment_feed.entry:
-                date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
-                if (date <= until_date):
-                    if comment.content.text is not None:
-                        print comment.content.text
-                        comment_str = comment_str + ' ' + comment.content.text
-            next_link = comment_feed.GetNextLink()
-            if next_link is None:
-                comment_feed = None
-            else:
-                comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
+        try:
+            comment_feed = self.yts.GetYouTubeVideoCommentFeed(video_id=video_id)
+            while comment_feed is not None:
+                for comment in comment_feed.entry:
+                    date = datetime.strptime(comment.published.text[:10], "%Y-%m-%d")
+                    if (date <= until_date):
+                        if comment.content.text is not None:
+                            print comment.content.text
+                            comment_str = comment_str + ' ' + comment.content.text
+                next_link = comment_feed.GetNextLink()
+                if next_link is None:
+                    comment_feed = None
+                else:
+                    comment_feed = self.yts.GetYouTubeVideoCommentFeed(next_link.href)
+        except gdata.service.RequestError:
+            raise gdata.service.RequestError
 
         return comment_str
 
@@ -53,7 +56,7 @@ def main():
     y = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
     #blabla = y.youtube_search('Interstellar trailer', results=10)
     #print blabla
-    comments = y.youtube_comments('Zh8gVF8tE2k', datetime(2014,10,10))
+    comments = y.youtube_comments('uA59s-f8WqM', datetime(2014,10,10))
     print comments
 
 if __name__ == '__main__':
