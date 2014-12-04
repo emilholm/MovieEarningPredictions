@@ -320,34 +320,40 @@ $(document).ready(function() {
                 cache: false,
                 success: function(data) {
                     var final_data = [];
-                    $.each(data, function(index, value) {
-                        final_data.push({"label": "Day "+ (index+1), "value": value});
-                    });
+                    console.log(data);
+                    if(!('error' in data)) {
+                        $.each(data, function(index, value) {
+                            final_data.push({"label": "Day "+ (index+1), "value": value});
+                        });
 
-                    var data_set = [
-                        {
-                            "key": "Earnings",
-                            "values": final_data
-                        }
-                    ];
+                        var data_set = [
+                            {
+                                "key": "Earnings",
+                                "values": final_data
+                            }
+                        ];
 
-                    nv.addGraph(function() {
-                        var chart = nv.models.discreteBarChart()
-                            .x(function(d) {return d.label})
-                            .y(function(d) {return d.value})
-                            .staggerLabels(true)
-                            .tooltips(false)
-                            .showValues(true);
+                        nv.addGraph(function() {
+                            var chart = nv.models.discreteBarChart()
+                                .x(function(d) {return d.label})
+                                .y(function(d) {return d.value})
+                                .staggerLabels(true)
+                                .tooltips(false)
+                                .showValues(true);
 
-                        d3.select('#chart_earnings svg')
-                                .datum(data_set)
-                                .transition().duration(500)
-                                .call(chart);
+                            d3.select('#chart_earnings svg')
+                                    .datum(data_set)
+                                    .transition().duration(500)
+                                    .call(chart);
 
-                        nv.utils.windowResize(chart.update);
+                            nv.utils.windowResize(chart.update);
 
-                        return chart;
-                    });
+                            return chart;
+                        });
+                    } else {
+                        $('#chart_earnings').find('svg').remove();
+                        $('#chart_earnings').append('<h3>Either the movies does not exists on BoxOfficeMojo.com, haven\'t had premiere yet. So there is no information about earnings</h3>');
+                    }
                     $earningsgraph.fadeIn();
                     $earningsLoading.remove();
 
@@ -369,8 +375,9 @@ $(document).ready(function() {
                     $analysis.remove();
 
                 },
-                error: function(data) {
+                error: function(data, textStatus) {
                     console.log(data);
+                    console.log(textStatus);
                     $analysis.remove();
                 }
             });
