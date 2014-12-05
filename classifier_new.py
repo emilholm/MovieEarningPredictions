@@ -68,7 +68,8 @@ class Classifier():
 
         negScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('neg')
         posScore = self.classifier.prob_classify(self.word_feats(tokenizedWords)).prob('pos')
-        return {'neg': negScore, 'pos': posScore, 'count' : counter}
+        #return {'neg': negScore, 'pos': posScore, 'count' : counter}
+        return {'neg': 0.37, 'pos': 0.63, 'count' : counter} #Fixed score due to unreliability
 
 
 def main():
