@@ -12,6 +12,7 @@ from YouTube import YouTube
 from BoxOfficeMojoException import BoxOfficeMojoException
 from classifier_new import Classifier
 from gdata.service import RequestError
+from Calculator import Calculator
 
 
 WEB_DIR = os.path.join(os.path.abspath("."), u"web")
@@ -29,6 +30,7 @@ class WebApp(object):
         self.wikifunctions = WikiSimpleAPIFunctions()
         self.youtube = YouTube('AIzaSyDQ6enre5eE7f_BIegK-2MOBbBAlMWaJgI')
         self.classifier = Classifier()
+        self.calculator = Calculator()
 
     @cherrypy.expose
     def index(self):
@@ -101,6 +103,14 @@ class WebApp(object):
             return dumps({"error": e.message})
 
     @cherrypy.expose
+    def getreleaseday(self, boxofficemojoname):
+        """Get the release date from BoxOfficeMojo given the boxofficemojo url name"""
+        box_name = boxofficemojoname.encode('utf-8')
+        release_date = self.boxofficemojo.get_release_date(box_name)
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return dumps({"release_date": release_date.strftime("%Y-%m-%d %H:%M:%S")})
+
+    @cherrypy.expose
     def sentimentanalysisytcomments(self, youtubeid, boxofficemojoname):
         """Analyse the comments of a youtube video until BoxOfficeMojo release date. If there is no
         BoxOfficeMojo release date use current date"""
@@ -132,6 +142,11 @@ class WebApp(object):
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return dumps({"error": e.message['body']})
 
+    @cherrypy.expose
+    def calculatescore(self, words, pos, pageviewsforyear):
+        """Calculates the blockbuster score"""
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return dumps(self.calculator.calculate_score(int(words), float(pos), int(pageviewsforyear)))
 
 
 def open_page():

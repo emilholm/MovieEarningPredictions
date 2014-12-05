@@ -26,3 +26,12 @@
   stroke: steelblue;
   stroke-width: 1.5px;
 }
+
+.status .panel-title {
+    font-size: 72px;
+    font-weight: bold;
+    color: #fff;
+    line-height: 45px;
+    padding-top: 20px;
+    letter-spacing: -0.8px;
+}

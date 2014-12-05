@@ -35,10 +35,8 @@ $(document).ready(function() {
             step_1 = $(this).attr('id');
         } else if (id == 2) {
             step_2 = $(this).attr('id');
-            console.log(step_2);
         } else if (id == 3) {
             step_3 = $(this).attr('id');
-            console.log(step_3);
         }
         $listgroup.find('li.active').removeClass('active');
         $(this).toggleClass('active');
@@ -228,7 +226,7 @@ $(document).ready(function() {
             $steps.collapse('hide');
             $steps.after('<div style="padding: 0;" class="generation col-xs-12 hide_show_steps"><button type="button" class="generation btn btn-primary pull-right" data-toggle="collapse" data-target="#steps"><span class="glyphicon glyphicon-cog"></span> Steps</button></div>').fadeIn();
             $steps.css('display', '');
-            $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>BoxOfficeMojo Earnings <small>First 7 days</small></h2></div>');
+            $('.hide_show_steps').after('<div id="graph-earnings" class="generation col-xs-12"><h2>BoxOfficeMojo Earnings <small>First 7 days in the US</small></h2></div>');
             $('#graph-earnings').append('<div class="generation" id="chart_earnings"><svg></svg></div>');
             var $earningsgraph = $("#chart_earnings").hide();
             $('#graph-earnings').append('<div id="loading" class="col-xs-12 page_earnings" style="margin-top:50px; margin-bottom: 50px"></div>');
@@ -238,63 +236,101 @@ $(document).ready(function() {
             $('#graph-pageviews').append('<div id="loading" class="col-xs-12 page_views_loading" style="margin-top:50px; margin-bottom: 50px"></div>');
             $('.hide_show_steps').after('<div id="analysis" class="generation col-xs-12"><h2>YouTube Comments</h2></div>');
             $('#analysis').append('<div id="loading" class="col-xs-12 youtube_comments" style="margin-top:50px; margin-bottom: 50px"></div>');
+            $('.hide_show_steps').after('<div id="calculation" class="generation col-xs-12"><h2>Forsight</h2></div>');
+            $('#calculation').append('<div id="loading" class="col-xs-12 calculation" style="margin-top:50px; margin-bottom: 50px"></div>');
             var $pageViewsLoading = $('.page_views_loading');
             var $earningsLoading = $('.page_earnings');
             var $analysis = $('.youtube_comments');
+            var $calculation = $('.calculation');
             $pageViewsLoading.append(new Spinner(opts).spin().el);
             $earningsLoading.append(new Spinner(opts).spin().el);
             $analysis.append(new Spinner(opts).spin().el);
+            $calculation.append(new Spinner(opts).spin().el);
 
-            $.ajax({
-                type: "POST",
-                url: "/getwikipageviews",
-                data: {"wikiname": step_1, "boxofficemojoname": step_2},
-                cache: false,
-                success: function(data) {
-                    var sorted_data = [];
-                    $.each(data, function(key, value) {
-                        var date = Date.parse(key.substring(0, 10));
-                        sorted_data.push([date, value]);
+            var $wikiviews = $.post("/getwikipageviews", {"wikiname": step_1, "boxofficemojoname": step_2});
+            var $earnings = $.post("/getfirstsevendaysearnings", {"boxofficemojoname": step_2});
+            var $sentiment = $.post("/sentimentanalysisytcomments", {"youtubeid": step_3, "boxofficemojoname": step_2});
+
+            $wikiviews.done(function(data){
+                var sorted_data = [];
+                $.each(data, function(key, value) {
+                    var date = Date.parse(key.substring(0, 10));
+                    sorted_data.push([date, value]);
+                });
+
+                sorted_data.sort(function(x, y) {
+                    return x[0] - y[0];
+                })
+
+                var data_set = [
+                    {
+                        "key": "Page views",
+                        "values": sorted_data
+                    }
+                ];
+
+                nv.addGraph(function() {
+                    var chart = nv.models.lineWithFocusChart()
+                            .x(function(d) {
+                        return d[0]
+                    })
+                            .y(function(d) {
+                        return d[1]
+                    })
+                            .color(d3.scale.category10().range());
+
+                    //nv.models.lineWithFocusChart();
+
+                    chart.xAxis
+                            .tickFormat(function(d) {
+                        return d3.time.format('%x')(new Date(d));
                     });
 
-                    sorted_data.sort(function(x, y) {
-                        return x[0] - y[0];
-                    })
+                    chart.x2Axis
+                            .tickFormat(function(d) {
+                        return d3.time.format('%x')(new Date(d));
+                    });
+
+                    chart.yAxis.tickFormat(d3.format('10'));
+
+                    chart.y2Axis.tickFormat(d3.format('10'));
+
+                    d3.select('#chart_page_views svg')
+                            .datum(data_set)
+                            .transition().duration(500)
+                            .call(chart);
+
+                    nv.utils.windowResize(chart.update);
+
+                    return chart;
+                });
+                $pageviewsgraph.fadeIn();
+                $pageViewsLoading.remove();
+            });
+
+            $earnings.done(function(data){
+                var final_data = [];
+                if(!('error' in data)) {
+                    $.each(data, function(index, value) {
+                        final_data.push({"label": "Day "+ (index+1), "value": value});
+                    });
 
                     var data_set = [
                         {
-                            "key": "Page views",
-                            "values": sorted_data
+                            "key": "Earnings",
+                            "values": final_data
                         }
                     ];
 
                     nv.addGraph(function() {
-                        var chart = nv.models.lineWithFocusChart()
-                                .x(function(d) {
-                            return d[0]
-                        })
-                                .y(function(d) {
-                            return d[1]
-                        })
-                                .color(d3.scale.category10().range());
+                        var chart = nv.models.discreteBarChart()
+                            .x(function(d) {return d.label})
+                            .y(function(d) {return d.value})
+                            .staggerLabels(true)
+                            .tooltips(false)
+                            .showValues(true);
 
-                        //nv.models.lineWithFocusChart();
-
-                        chart.xAxis
-                                .tickFormat(function(d) {
-                            return d3.time.format('%x')(new Date(d));
-                        });
-
-                        chart.x2Axis
-                                .tickFormat(function(d) {
-                            return d3.time.format('%x')(new Date(d));
-                        });
-
-                        chart.yAxis.tickFormat(d3.format('10'));
-
-                        chart.y2Axis.tickFormat(d3.format('10'));
-
-                        d3.select('#chart_page_views svg')
+                        d3.select('#chart_earnings svg')
                                 .datum(data_set)
                                 .transition().duration(500)
                                 .call(chart);
@@ -303,82 +339,75 @@ $(document).ready(function() {
 
                         return chart;
                     });
-                    $pageviewsgraph.fadeIn();
-                    $pageViewsLoading.remove();
-
-                },
-                error: function(data) {
-                    console.log(data);
-                    $pageViewsLoading.remove();
+                } else {
+                    $('#chart_earnings').find('svg').remove();
+                    $('#chart_earnings').append('<h3>Either the movies does not exists on BoxOfficeMojo.com, haven\'t had premiere yet. So there is no information about earnings</h3>');
                 }
+                $earningsgraph.fadeIn();
+                $earningsLoading.remove();
             });
 
-            $.ajax({
-                type: "POST",
-                url: "/getfirstsevendaysearnings",
-                data: {"boxofficemojoname": step_2},
-                cache: false,
-                success: function(data) {
-                    var final_data = [];
-                    console.log(data);
-                    if(!('error' in data)) {
-                        $.each(data, function(index, value) {
-                            final_data.push({"label": "Day "+ (index+1), "value": value});
-                        });
+            $sentiment.done(function(data){
+                $('#analysis').append('<div class="col-xs-12 col-sm-4"><div class="panel status panel-primary"><div class="panel-heading"><h2 class="panel-title text-center">' + data['count'] + '</h2></div><div class="panel-footer"> <p>Total Number of Words</p><div></div></div>');
+                $('#analysis').append('<div class="col-xs-12 col-sm-4"><div class="panel status panel-success"><div class="panel-heading"><h2 class="panel-title text-center">' + Math.round((data['pos']*100)) + '%</h2></div><div class="panel-footer"> <p>Positive Words</p><div></div></div>');
+                $('#analysis').append('<div class="col-xs-12 col-sm-4"><div class="panel status panel-danger"><div class="panel-heading"><h2 class="panel-title text-center">' + Math.round((data['neg']*100)) + '%</h2></div><div class="panel-footer"> <p>Negative Words</p><div></div></div>');
 
-                        var data_set = [
-                            {
-                                "key": "Earnings",
-                                "values": final_data
+                $analysis.remove();
+            });
+            $.when($wikiviews, $sentiment).done(function(wiki, sentiment){
+
+                var $release_date = $.post('/getreleaseday', {boxofficemojoname: step_2});
+                $.when($release_date).done(function(data){
+                    var release_date = data['release_date'];
+
+                    if(wiki[1] == "success" && sentiment[1] == "success") {
+                        var pageviews = 0;
+                        var start_date = new Date(release_date.substring(0, 10));
+                        var end_date = new Date(start_date.getFullYear()-1, start_date.getMonth(), start_date.getDate());
+                        $.each(wiki[0], function(key, value) {
+                            var date = Date.parse(key.substring(0, 10));
+                            if(date >= end_date && date <= start_date) {
+                                pageviews += value;
                             }
-                        ];
-
-                        nv.addGraph(function() {
-                            var chart = nv.models.discreteBarChart()
-                                .x(function(d) {return d.label})
-                                .y(function(d) {return d.value})
-                                .staggerLabels(true)
-                                .tooltips(false)
-                                .showValues(true);
-
-                            d3.select('#chart_earnings svg')
-                                    .datum(data_set)
-                                    .transition().duration(500)
-                                    .call(chart);
-
-                            nv.utils.windowResize(chart.update);
-
-                            return chart;
                         });
-                    } else {
-                        $('#chart_earnings').find('svg').remove();
-                        $('#chart_earnings').append('<h3>Either the movies does not exists on BoxOfficeMojo.com, haven\'t had premiere yet. So there is no information about earnings</h3>');
-                    }
-                    $earningsgraph.fadeIn();
-                    $earningsLoading.remove();
 
-                },
-                error: function(data) {
+                        $.post("/calculatescore", {"words": sentiment[0]['count'], "pos": sentiment[0]['pos'], "pageviewsforyear": pageviews})
+                            .done(function(data) {
+                                if(data > 500)
+                                    $('#calculation').append('<h2>We think we have a BlockBuster on our hands</h2>');
+                                else if (data > 100)
+                                    $('#calculation').append('<h2>It is going to sell, but it is no BlockBuster</h2>');
+                                else
+                                    $('#calculation').append('<h2>It is going to be tuf!</h2>');
+
+                                $calculation.remove();
+                            });
+                    } else {
+                        $('#calculation').append('<h3>An error has occurred, so no prediction can be made</h3>');
+                        $calculation.remove();
+                    }
+                }).fail(function(data){
                     console.log(data);
-                    $earningsLoading.remove();
-                }
+                    $('#calculation').append('<h3>An error has occurred, so no prediction can be made</h3>');
+                    $calculation.remove();
+                });
             });
 
-            $.ajax({
-                type: "POST",
-                url: "/sentimentanalysisytcomments",
-                data: {"youtubeid": step_3, "boxofficemojoname": step_2},
-                cache: false,
-                success: function(data) {
-                    console.log(data);
-                    $analysis.remove();
-                },
-                error: function(data) {
-                    var error = $.parseJSON(data.responseText);
-                    $('#analysis').append('<h3>' + error['error'] + '</h3>');
-                    console.log(data);
-                    $analysis.remove();
-                }
+            $wikiviews.fail(function(data) {
+                console.log(data);
+                $pageViewsLoading.remove();
+            });
+
+            $earnings.fail(function(data){
+                console.log(data);
+                $earningsLoading.remove();
+            });
+
+            $sentiment.fail(function(data){
+                var error = $.parseJSON(data.responseText);
+                $('#analysis').append('<h3>' + error['error'] + '</h3>');
+                console.log(error['error']);
+                $analysis.remove();
             });
         }
     });
