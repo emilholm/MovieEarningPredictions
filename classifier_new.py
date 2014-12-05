@@ -4,7 +4,7 @@ from nltk.classify import NaiveBayesClassifier
 from nltk.corpus import movie_reviews
 import nltk.tokenize
 import re
-#test
+
 
 class Classifier():
     def __init__(self):
@@ -16,6 +16,9 @@ class Classifier():
 
 
     def train_classifier(self):
+        """This code is heavily inspired by:
+        http://streamhacker.com/2010/05/10/text-classification-sentiment-analysis-naive-bayes-classifier/
+        """
         negids = movie_reviews.fileids('neg')
         posids = movie_reviews.fileids('pos')
 
@@ -56,7 +59,7 @@ class Classifier():
             except:
                 pass
 
-        #print stemmedWords
+        print stemmedWords
 
 
 

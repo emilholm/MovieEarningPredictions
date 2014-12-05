@@ -11,15 +11,15 @@ class Classifier():
         self.train_classifier()
 
 
-    def word_feats(self,words):
+    def _word_feats(self,words):
         return dict([(word, True) for word in words])
 
     def train_classifier(self):
         negids = movie_reviews.fileids('neg')
         posids = movie_reviews.fileids('pos')
 
-        negfeats = [(self.word_feats(movie_reviews.words(fileids=[f])), 'neg') for f in negids]
-        posfeats = [(self.word_feats(movie_reviews.words(fileids=[f])), 'pos') for f in posids]
+        negfeats = [(self._word_feats(movie_reviews.words(fileids=[f])), 'neg') for f in negids]
+        posfeats = [(self._word_feats(movie_reviews.words(fileids=[f])), 'pos') for f in posids]
 
         negcutoff = len(negfeats)*3/4
         poscutoff = len(posfeats)*3/4
@@ -72,8 +72,8 @@ class Classifier():
         #for word in words:
 
 
-        negScore = self.classifier.prob_classify(self.word_feats(stemmedWords)).prob('neg') #classifier
-        posScore = self.classifier.prob_classify(self.word_feats(stemmedWords)).prob('pos')
+        negScore = self.classifier.prob_classify(self._word_feats(stemmedWords)).prob('neg') #classifier
+        posScore = self.classifier.prob_classify(self._word_feats(stemmedWords)).prob('pos')
         return {'neg': negScore, 'pos': posScore}
 
 
